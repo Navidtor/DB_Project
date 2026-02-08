@@ -8,17 +8,17 @@ This document describes the practical implementation of the **Hamsafar Mirza** (
 
 ## 2. Technology Stack
 
-| Technology       | Purpose                          |
-| ---------------- | -------------------------------- |
-| **React 18**     | Frontend framework               |
-| **TypeScript**   | Type-safe JavaScript             |
-| **Vite**         | Build tool and dev server        |
-| **Tailwind CSS** | Utility-first CSS framework      |
-| **Shadcn/UI**    | UI component library             |
-| **React Router** | Client-side routing              |
-| **React Flow**   | EER/ER diagram visualization     |
-| **Supabase JS**  | Postgres client + auth APIs      |
-| **Lucide React** | Icon library                     |
+| Technology       | Purpose                      |
+| ---------------- | ---------------------------- |
+| **React 18**     | Frontend framework           |
+| **TypeScript**   | Type-safe JavaScript         |
+| **Vite**         | Build tool and dev server    |
+| **Tailwind CSS** | Utility-first CSS framework  |
+| **Shadcn/UI**    | UI component library         |
+| **React Router** | Client-side routing          |
+| **React Flow**   | EER/ER diagram visualization |
+| **Supabase JS**  | Postgres client + auth APIs  |
+| **Lucide React** | Icon library                 |
 
 ---
 
@@ -123,7 +123,7 @@ The types in `src/types/database.ts` mirror the database schema:
 
 ```typescript
 // User Types
-type UserType = 'regular' | 'moderator' | 'admin';
+type UserType = "regular" | "moderator" | "admin";
 
 interface User {
   user_id: string;
@@ -145,6 +145,7 @@ interface User {
 ## 6. Application Features
 
 ### 6.1 Authentication System
+
 - **Login Page**: Email/password authentication with Supabase Auth
 - **Registration Page**: User signup with validation (username, email, password)
 - **Protected Routes**: Route guards redirect unauthenticated users to login
@@ -157,12 +158,14 @@ interface User {
   - Automatic token refresh via Supabase Auth
 
 ### 6.2 User Management
+
 - **User Profiles**: View/edit profiles with bio, cover image, and interests
 - **Role-based Access**: Regular, Moderator, Admin with distinct attributes
 - **Follow/Unfollow System**: Social connections with follower counts
 - **User Directory**: Browse and search all users with filters
 
 ### 6.3 Content System
+
 - **Create Posts**: Travel experiences (visited/imagined) with image galleries
 - **Edit Posts**: Full CRUD operations for post owners
 - **Comments**: Add/delete comments on posts
@@ -170,18 +173,21 @@ interface User {
 - **Content Approval**: Pending/approved/rejected workflow
 
 ### 6.4 Location System
+
 - **Browse Cities**: Filter by city with post counts
 - **Browse Places**: Attractions with features and images
 - **Location Features**: Multi-valued attributes (parking, restaurant, etc.)
 - **Map Integration**: External map links
 
 ### 6.5 Companion System
+
 - **Create Requests**: Travel companion requests with date and conditions
 - **Match Requests**: Send/receive companion match requests
 - **Accept/Reject**: Request owner can accept or reject matches
 - **Status Tracking**: Active, completed, or cancelled requests
 
 ### 6.6 Testing
+
 - **Browser Test Suite**: Interactive API testing at `/app/test`
 - **CLI Test Suite**: Command-line tests via `npx tsx src/__tests__/api-tests.ts`
 - **Coverage**: Read operations, write operations, error handling, data validation
@@ -192,12 +198,12 @@ interface User {
 
 ### Public Routes
 
-| Route          | Component    | Description            |
-| -------------- | ------------ | ---------------------- |
-| `/login`       | LoginPage    | User login             |
-| `/register`    | RegisterPage | User registration      |
-| `/eer-diagram` | EERDiagram   | EER diagram            |
-| `/er-diagram`  | ERDiagram    | ER diagram             |
+| Route          | Component    | Description       |
+| -------------- | ------------ | ----------------- |
+| `/login`       | LoginPage    | User login        |
+| `/register`    | RegisterPage | User registration |
+| `/eer-diagram` | EERDiagram   | EER diagram       |
+| `/er-diagram`  | ERDiagram    | ER diagram        |
 
 ### Protected Routes (require authentication)
 
@@ -246,6 +252,7 @@ npm run build
 ## 9. Database Connection
 
 ### Supabase + Mock Data Modes
+
 The data layer can run in three modes:
 
 - **mock**: Always use `src/data/mockData.ts`
@@ -253,17 +260,20 @@ The data layer can run in three modes:
 - **auto**: Default; use Supabase if configured, otherwise fallback to mock data
 
 Key files:
+
 - **Client**: `src/lib/supabase.ts` (reads `VITE_DATA_SOURCE` or Vite `MODE`)
 - **API Layer**: `src/lib/api.ts` (runtime switch + fallback logic)
 - **Seeder**: `scripts/seed-supabase.ts` (loads mock data into Supabase)
 
 Environment:
+
 - `.env.local` uses `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
 - `VITE_DATA_SOURCE` can be set to `mock`, `supabase`, or `auto`
 
 Note: The mock dataset includes `cities.image`. The seed script will insert it if the column exists; otherwise it skips the column and logs a warning.
 
 ### Frontend
+
 - Deploy to Vercel, Netlify, or similar
 - Environment variables for Supabase credentials
 
@@ -274,6 +284,7 @@ Note: The mock dataset includes `cities.image`. The seed script will insert it i
 ### 10.1 Read Operations (`api.ts`)
 
 All read operations follow a consistent pattern:
+
 - Check `shouldUseMockData` flag
 - If mock mode: return from `mockData.ts`
 - If Supabase: execute query with error handling and mock fallback
@@ -283,11 +294,11 @@ export async function getPosts(): Promise<Post[]> {
   if (shouldUseMockData) return mockData.posts;
   const client = requireSupabaseClient();
   try {
-    const { data, error } = await client.from('posts_with_rating').select('*');
-    if (error) return handleSupabaseError('Error', error, mockData.posts);
+    const { data, error } = await client.from("posts_with_rating").select("*");
+    if (error) return handleSupabaseError("Error", error, mockData.posts);
     return data || [];
   } catch (error) {
-    return handleSupabaseError('Error', error, mockData.posts);
+    return handleSupabaseError("Error", error, mockData.posts);
   }
 }
 ```
@@ -295,6 +306,7 @@ export async function getPosts(): Promise<Post[]> {
 ### 10.2 Write Operations (`api-write.ts`)
 
 All write operations return `{ data, error }` pattern:
+
 - `createPost`, `updatePost`, `deletePost`
 - `createComment`, `deleteComment`
 - `createOrUpdateRating`
@@ -306,6 +318,7 @@ All write operations return `{ data, error }` pattern:
 ### 10.3 Error Handling
 
 All API functions include comprehensive error handling:
+
 - Database errors are caught and logged
 - Mock fallback is available in `auto` mode
 - User-facing errors are returned, not thrown
@@ -328,13 +341,20 @@ All API functions include comprehensive error handling:
 ✅ Rating and comment system  
 ✅ Companion matching system  
 ✅ API test suites (browser + CLI)  
-✅ Comprehensive documentation  
+✅ Comprehensive documentation
 
 ---
+
+## Appendix: SupaBase EER Diagram
+
+The following EER model was used in SupaBase.com as database schema:
+
+![SupaBase EER Diagram](./supabase-schema.png)
 
 ## 12. Code Quality
 
 ### 12.1 Error Handling Patterns
+
 - All async operations wrapped in try-catch
 - Proper cleanup in useEffect hooks
 - Memory leak prevention (setTimeout cleanup)
@@ -343,12 +363,14 @@ All API functions include comprehensive error handling:
 - Auth state changes use flag-based deduplication to prevent race conditions
 
 ### 12.2 Type Safety
+
 - No `any` types in application code
 - Optional chaining for nullable properties
 - Nullish coalescing for default values
 - Proper type guards for runtime checks
 
 ### 12.3 Performance
+
 - Parallel API calls with `Promise.all`
 - Memoization with `useMemo` for derived data
 - Efficient array lookups with `Map` structures
@@ -368,4 +390,4 @@ All API functions include comprehensive error handling:
 
 ---
 
-*This document serves as the formal deliverable for Phase 3: Practical Implementation.*
+_This document serves as the formal deliverable for Phase 3: Practical Implementation._
